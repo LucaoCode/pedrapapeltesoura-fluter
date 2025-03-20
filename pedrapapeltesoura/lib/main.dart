@@ -1,125 +1,232 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(const MyApp());
+class PPT extends StatefulWidget {
+  const PPT({Key? key}) : super(key: key);
+
+  @override
+  State<PPT> createState() => _PPTState();
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class _PPTState extends State<PPT> {
+  String _imgUserPlayer = "imagens/indefinido.png";
+  String _imgAppPlayer = "imagens/indefinido.png";
 
-  // This widget is the root of your application.
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
-    );
+  // PONTUAÇÃO
+  int _userPoints = 0;
+  int _appPoints = 0;
+  int _tiePoints = 0;
+
+  //Bordas:
+  Color _borderUserColor = Colors.transparent;
+  Color _borderAppColor = Colors.transparent;
+
+  String _obtemEscolhaApp() {
+    var opcoes = ['pedra', 'papel', 'tesoura'];
+
+    String vlrEscolhido = opcoes[Random().nextInt(3)];
+
+    return vlrEscolhido;
   }
-}
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
+  void _terminaJogada(String escolhaUser, String escolhaApp) {
+    var resultado = "indefinido";
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
+    switch (escolhaUser) {
+      case "pedra":
+        if (escolhaApp == "papel") {
+          resultado = "app";
+        } else if (escolhaApp == "tesoura") {
+          resultado = "user";
+        } else {
+          resultado = "empate";
+        }
+        break;
+      case "papel":
+        if (escolhaApp == "pedra") {
+          resultado = "user";
+        } else if (escolhaApp == "tesoura") {
+          resultado = "app";
+        } else {
+          resultado = "empate";
+        }
+        break;
+      case "tesoura":
+        if (escolhaApp == "papel") {
+          resultado = "user";
+        } else if (escolhaApp == "pedra") {
+          resultado = "app";
+        } else {
+          resultado = "empate";
+        }
+        break;
+    }
 
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
     setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
+      if (resultado == "user") {
+        _userPoints++;
+        _borderUserColor = Colors.green;
+        _borderAppColor = Colors.transparent;
+      } else if (resultado == "app") {
+        _appPoints++;
+        _borderUserColor = Colors.transparent;
+        _borderAppColor = Colors.green;
+      } else {
+        _tiePoints++;
+        _borderUserColor = Colors.orange;
+        _borderAppColor = Colors.orange;
+      }
     });
   }
 
+  void _iniciaJogada(String opcao) {
+    //Configura a opção escolhida pelo usuário:
+    setState(() {
+      _imgUserPlayer = "imagens/$opcao.png";
+    });
+
+    String escolhaApp = _obtemEscolhaApp();
+    setState(() {
+      _imgAppPlayer = "imagens/$escolhaApp.png";
+    });
+
+    _terminaJogada(opcao, escolhaApp);
+  }
+
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-    return Scaffold(
-      appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
+    return MaterialApp(
+      theme: ThemeData(primarySwatch: Colors.green),
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text("App - Pedra Papel Tesoura"),
         ),
+        body: Column(children: [
+          const Padding(
+            padding: EdgeInsets.only(top: 10, bottom: 20),
+            child: Text(
+              'Disputa',
+              style: TextStyle(fontSize: 26),
+            ),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Badge(borderColor: _borderUserColor, imgPlayer: _imgUserPlayer),
+              const Text('VS'),
+              Badge(borderColor: _borderAppColor, imgPlayer: _imgAppPlayer),
+            ],
+          ),
+          const Padding(
+            padding: EdgeInsets.only(top: 10, bottom: 20),
+            child: Text(
+              'Placar',
+              style: TextStyle(fontSize: 18),
+            ),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Placar(playerName: 'Você', playerPoints: _userPoints),
+              Placar(playerName: 'Empate', playerPoints: _tiePoints),
+              Placar(playerName: 'App', playerPoints: _appPoints),
+            ],
+          ),
+          const Padding(
+            padding: EdgeInsets.only(top: 10, bottom: 20),
+            child: Text(
+              'Opções',
+              style: TextStyle(fontSize: 16),
+            ),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              GestureDetector(
+                onTap: () => _iniciaJogada("pedra"),
+                child: Image.asset(
+                  'imagens/pedra.png',
+                  height: 90,
+                ),
+              ),
+              GestureDetector(
+                onTap: () => _iniciaJogada("papel"),
+                child: Image.asset(
+                  'imagens/papel.png',
+                  height: 90,
+                ),
+              ),
+              GestureDetector(
+                onTap: () => _iniciaJogada("tesoura"),
+                child: Image.asset(
+                  'imagens/tesoura.png',
+                  height: 90,
+                ),
+              ),
+            ],
+          )
+        ]),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
+}
+
+class Placar extends StatelessWidget {
+  const Placar({
+    Key? key,
+    required String playerName,
+    required int playerPoints,
+  })  : _playerPoints = playerPoints,
+        _playerName = playerName,
+        super(key: key);
+
+  final int _playerPoints;
+  final String _playerName;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(_playerName),
+        Container(
+          decoration: BoxDecoration(
+              border: Border.all(color: Colors.black45, width: 2),
+              borderRadius: const BorderRadius.all(Radius.circular(7))),
+          margin: const EdgeInsets.all(8),
+          padding: const EdgeInsets.all(35),
+          child: Text('$_playerPoints', style: TextStyle(fontSize: 26)),
+        )
+      ],
+    );
+  }
+}
+
+class Badge extends StatelessWidget {
+  const Badge({
+    Key? key,
+    required Color borderColor,
+    required String imgPlayer,
+  })  : _borderColor = borderColor,
+        _imgPlayer = imgPlayer,
+        super(key: key);
+
+  final Color _borderColor;
+  final String _imgPlayer;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+          border: Border.all(color: _borderColor, width: 4),
+          borderRadius: const BorderRadius.all(Radius.circular(100))),
+      child: Image.asset(
+        _imgPlayer,
+        height: 120,
+      ),
+    );
+  }
+}
+
+void main() {
+  runApp(const PPT());
 }
