@@ -1,232 +1,184 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 
-class PPT extends StatefulWidget {
-  const PPT({Key? key}) : super(key: key);
-
-  @override
-  State<PPT> createState() => _PPTState();
+void main() {
+  runApp(const JogoPPT());
 }
 
-class _PPTState extends State<PPT> {
-  String _imgUserPlayer = "imagens/indefinido.png";
-  String _imgAppPlayer = "imagens/indefinido.png";
-
-  // PONTUAÇÃO
-  int _userPoints = 0;
-  int _appPoints = 0;
-  int _tiePoints = 0;
-
-  //Bordas:
-  Color _borderUserColor = Colors.transparent;
-  Color _borderAppColor = Colors.transparent;
-
-  String _obtemEscolhaApp() {
-    var opcoes = ['pedra', 'papel', 'tesoura'];
-
-    String vlrEscolhido = opcoes[Random().nextInt(3)];
-
-    return vlrEscolhido;
-  }
-
-  void _terminaJogada(String escolhaUser, String escolhaApp) {
-    var resultado = "indefinido";
-
-    switch (escolhaUser) {
-      case "pedra":
-        if (escolhaApp == "papel") {
-          resultado = "app";
-        } else if (escolhaApp == "tesoura") {
-          resultado = "user";
-        } else {
-          resultado = "empate";
-        }
-        break;
-      case "papel":
-        if (escolhaApp == "pedra") {
-          resultado = "user";
-        } else if (escolhaApp == "tesoura") {
-          resultado = "app";
-        } else {
-          resultado = "empate";
-        }
-        break;
-      case "tesoura":
-        if (escolhaApp == "papel") {
-          resultado = "user";
-        } else if (escolhaApp == "pedra") {
-          resultado = "app";
-        } else {
-          resultado = "empate";
-        }
-        break;
-    }
-
-    setState(() {
-      if (resultado == "user") {
-        _userPoints++;
-        _borderUserColor = Colors.green;
-        _borderAppColor = Colors.transparent;
-      } else if (resultado == "app") {
-        _appPoints++;
-        _borderUserColor = Colors.transparent;
-        _borderAppColor = Colors.green;
-      } else {
-        _tiePoints++;
-        _borderUserColor = Colors.orange;
-        _borderAppColor = Colors.orange;
-      }
-    });
-  }
-
-  void _iniciaJogada(String opcao) {
-    //Configura a opção escolhida pelo usuário:
-    setState(() {
-      _imgUserPlayer = "imagens/$opcao.png";
-    });
-
-    String escolhaApp = _obtemEscolhaApp();
-    setState(() {
-      _imgAppPlayer = "imagens/$escolhaApp.png";
-    });
-
-    _terminaJogada(opcao, escolhaApp);
-  }
+class JogoPPT extends StatelessWidget {
+  const JogoPPT({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(primarySwatch: Colors.green),
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text("App - Pedra Papel Tesoura"),
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData.dark().copyWith(
+        scaffoldBackgroundColor: Colors.black,
+      ),
+      home: const TelaJogo(),
+    );
+  }
+}
+
+class TelaJogo extends StatefulWidget {
+  const TelaJogo({super.key});
+
+  @override
+  State<TelaJogo> createState() => _TelaJogoState();
+}
+
+class _TelaJogoState extends State<TelaJogo> {
+  final Map<String, String> opcoes = {
+    "pedra": "assets/pedra.png",
+    "papel": "assets/papel.png",
+    "tesoura": "assets/tesoura.png"
+  };
+
+  String imgUsuario = "assets/indefinido.png";
+  String imgApp = "assets/indefinido.png";
+
+  int pontosUsuario = 0;
+  int pontosApp = 0;
+  int empates = 0;
+
+  Color corBordaUsuario = Colors.transparent;
+  Color corBordaApp = Colors.transparent;
+
+  String escolhaApp() {
+    List<String> escolhas = opcoes.keys.toList();
+    return escolhas[Random().nextInt(escolhas.length)];
+  }
+
+  void jogar(String escolhaUsuario) {
+    String escolhaDoApp = escolhaApp();
+
+    setState(() {
+      imgUsuario = opcoes[escolhaUsuario]!;
+      imgApp = opcoes[escolhaDoApp]!;
+
+      if (escolhaUsuario == escolhaDoApp) {
+        empates++;
+        corBordaUsuario = Colors.orange;
+        corBordaApp = Colors.orange;
+      } else if ((escolhaUsuario == "pedra" && escolhaDoApp == "tesoura") ||
+          (escolhaUsuario == "papel" && escolhaDoApp == "pedra") ||
+          (escolhaUsuario == "tesoura" && escolhaDoApp == "papel")) {
+        pontosUsuario++;
+        corBordaUsuario = Colors.green;
+        corBordaApp = Colors.transparent;
+      } else {
+        pontosApp++;
+        corBordaUsuario = Colors.transparent;
+        corBordaApp = Colors.green;
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Pedra, Papel e Tesoura"),
+        centerTitle: true,
+        backgroundColor: Colors.deepPurple,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text("Escolha sua jogada:", style: TextStyle(fontSize: 22)),
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: opcoes.keys.map((opcao) {
+                return GestureDetector(
+                  onTap: () => jogar(opcao),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(15),
+                        color: Colors.deepPurple,
+                      ),
+                      padding: const EdgeInsets.all(10),
+                      child: Image.asset(opcoes[opcao]!, width: 80),
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 30),
+            const Text("Resultado da Rodada", style: TextStyle(fontSize: 22)),
+            const SizedBox(height: 15),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                JogadorBadge(borda: corBordaUsuario, imagem: imgUsuario),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20),
+                  child: Text("VS", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                ),
+                JogadorBadge(borda: corBordaApp, imagem: imgApp),
+              ],
+            ),
+            const SizedBox(height: 30),
+            const Text("Placar", style: TextStyle(fontSize: 22)),
+            const SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Placar(nome: "Você", pontos: pontosUsuario),
+                Placar(nome: "Empates", pontos: empates),
+                Placar(nome: "App", pontos: pontosApp),
+              ],
+            ),
+          ],
         ),
-        body: Column(children: [
-          const Padding(
-            padding: EdgeInsets.only(top: 10, bottom: 20),
-            child: Text(
-              'Disputa',
-              style: TextStyle(fontSize: 26),
-            ),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Badge(borderColor: _borderUserColor, imgPlayer: _imgUserPlayer),
-              const Text('VS'),
-              Badge(borderColor: _borderAppColor, imgPlayer: _imgAppPlayer),
-            ],
-          ),
-          const Padding(
-            padding: EdgeInsets.only(top: 10, bottom: 20),
-            child: Text(
-              'Placar',
-              style: TextStyle(fontSize: 18),
-            ),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Placar(playerName: 'Você', playerPoints: _userPoints),
-              Placar(playerName: 'Empate', playerPoints: _tiePoints),
-              Placar(playerName: 'App', playerPoints: _appPoints),
-            ],
-          ),
-          const Padding(
-            padding: EdgeInsets.only(top: 10, bottom: 20),
-            child: Text(
-              'Opções',
-              style: TextStyle(fontSize: 16),
-            ),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              GestureDetector(
-                onTap: () => _iniciaJogada("pedra"),
-                child: Image.asset(
-                  'imagens/pedra.png',
-                  height: 90,
-                ),
-              ),
-              GestureDetector(
-                onTap: () => _iniciaJogada("papel"),
-                child: Image.asset(
-                  'imagens/papel.png',
-                  height: 90,
-                ),
-              ),
-              GestureDetector(
-                onTap: () => _iniciaJogada("tesoura"),
-                child: Image.asset(
-                  'imagens/tesoura.png',
-                  height: 90,
-                ),
-              ),
-            ],
-          )
-        ]),
       ),
     );
   }
 }
 
-class Placar extends StatelessWidget {
-  const Placar({
-    Key? key,
-    required String playerName,
-    required int playerPoints,
-  })  : _playerPoints = playerPoints,
-        _playerName = playerName,
-        super(key: key);
+class JogadorBadge extends StatelessWidget {
+  final Color borda;
+  final String imagem;
 
-  final int _playerPoints;
-  final String _playerName;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text(_playerName),
-        Container(
-          decoration: BoxDecoration(
-              border: Border.all(color: Colors.black45, width: 2),
-              borderRadius: const BorderRadius.all(Radius.circular(7))),
-          margin: const EdgeInsets.all(8),
-          padding: const EdgeInsets.all(35),
-          child: Text('$_playerPoints', style: TextStyle(fontSize: 26)),
-        )
-      ],
-    );
-  }
-}
-
-class Badge extends StatelessWidget {
-  const Badge({
-    Key? key,
-    required Color borderColor,
-    required String imgPlayer,
-  })  : _borderColor = borderColor,
-        _imgPlayer = imgPlayer,
-        super(key: key);
-
-  final Color _borderColor;
-  final String _imgPlayer;
+  const JogadorBadge({super.key, required this.borda, required this.imagem});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-          border: Border.all(color: _borderColor, width: 4),
-          borderRadius: const BorderRadius.all(Radius.circular(100))),
-      child: Image.asset(
-        _imgPlayer,
-        height: 120,
+        border: Border.all(color: borda, width: 4),
+        borderRadius: BorderRadius.circular(100),
       ),
+      child: Image.asset(imagem, height: 120),
     );
   }
 }
 
-void main() {
-  runApp(const PPT());
+class Placar extends StatelessWidget {
+  final String nome;
+  final int pontos;
+
+  const Placar({super.key, required this.nome, required this.pontos});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(nome, style: const TextStyle(fontSize: 18)),
+        Container(
+          margin: const EdgeInsets.all(8),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.deepPurple,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Text('$pontos', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+        ),
+      ],
+    );
+  }
 }
